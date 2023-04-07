@@ -1,0 +1,12 @@
+[package]
+name = "currconv"
+version = "0.1.0"
+authors = ["Henry Larson"]
+edition = "2021"
+description = "A simple currency converter"
+
+[dependencies]
+clap = { version = "4.2.0", features = ["derive"] }
+csv = "1.2.1"
+redis = "0.22.3"
+serde = { version = "1.0.159", features = ["derive"] }
