@@ -1,15 +1,18 @@
 mod args;
 mod conv;
+mod rate;
 
 use args::CalcArgs;
 use clap::Parser;
-use conv::get_conv;
+use rate::get_forex_symbols;
 
 fn main() {
-    let args = CalcArgs::parse();
+    // let _args = CalcArgs::parse();
 
-    let _res = get_conv(args.from, args.to, args.amount);
+    // let mut conn = redis_client().get_connection().unwrap();
+    // let result: () = redis::cmd("PING").query(&mut conn).unwrap();
 
-    // let forex_from = format!("forex_rate:{symbol}", symbol=_args.from);
-    // let forex_to = format!("forex_rate:{symbol}", symbol=_args.to);
+    // dbg!(&result);
+
+    // get_forex_symbols().unwrap();
 }

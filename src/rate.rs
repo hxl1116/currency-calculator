@@ -1,4 +1,4 @@
-use redis::{Client, Commands, RedisResult, RedisError};
+use redis::{Client, Commands, RedisResult};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -6,15 +6,28 @@ use serde::Deserialize;
 pub struct ForexRate {
     symbol: String,
     name: String,
-    ratio: f64,
-    inversion: f64,
+    rate: f64,
+    inverse: f64,
 }
 
-fn fetch_rate(rate_symbol: String) -> RedisResult<()> {
-    let client = Client::open("redis://127.0.0.1/")?;
-    let mut conn = client.get_connection()?;
+pub fn redis_client() -> Client {
+    Client::open("redis://localhost:6379").unwrap()
+}
 
-    // let _ : RedisResult<RV> = conn.hget(String::from("forex_rate:"), rate_symbol);
+pub fn get_forex_symbols() -> RedisResult<()> {
+    let mut conn = redis_client().get_connection().unwrap();
+    let result = conn.hgetall("forex_rates").unwrap();
 
-    Ok(())
+    dbg!(&result);
+    Ok(result)
+}
+
+pub fn get_forex_rate(forex_symbol: String) -> RedisResult<()> {
+    let mut conn = redis_client().get_connection().unwrap();
+    let forex_key = format!("forex_rate:{}", forex_symbol);
+    let res: () = conn.hgetall(forex_key).unwrap();
+
+    dbg!(&res);
+
+    Ok(res)
 }
