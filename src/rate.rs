@@ -1,33 +1,36 @@
 use redis::{Commands, RedisResult};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ForexRate {
-    symbol: String,
-    name: String,
-    rate: f64,
-    inverse: f64,
+    pub symbol: String,
+    pub name: String,
+    pub rate: f64,
+    pub inverse: f64,
 }
 
 pub fn redis_client() -> redis::Client {
     redis::Client::open("redis://127.0.0.1:6379").unwrap()
 }
 
-pub fn get_forex_symbols() -> RedisResult<()> {
+pub fn get_forex_symbols() -> RedisResult<Vec<String>> {
     let mut conn = redis_client().get_connection().unwrap();
-    let result: () = conn.hgetall("forex_rates").unwrap();
-
-    dbg!(&result);
+    let result: Vec<String> = conn.hgetall("forex_rates").unwrap();
+    
     Ok(result)
 }
 
-pub fn get_forex_rate(forex_symbol: String) -> RedisResult<()> {
+pub fn get_forex_rate(forex_symbol: String) -> RedisResult<ForexRate> {
     let mut conn = redis_client().get_connection().unwrap();
-    let forex_key = format!("forex_rate:{}", forex_symbol);
-    let res: () = conn.hgetall(forex_key).unwrap();
+    let result: Vec<String> = conn.hvals(format!("forex_rate:{}", forex_symbol)).unwrap();
 
-    dbg!(&res);
+    let rate = ForexRate {
+        symbol: result[0].clone(),
+        name: result[1].clone(),
+        rate: result[2].parse().unwrap(),
+        inverse: result[3].parse().unwrap(),
+    };
 
-    Ok(res)
+    Ok(rate)
 }
