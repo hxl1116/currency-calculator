@@ -13,12 +13,19 @@ pub fn get_conv_to_usd(amt: f64, from: String) -> Conversion {
 
     Conversion {
         symbol: from_rate.symbol,
-        value: amt * from_rate.inverse,
+        value: amt * from_rate.inverse
     }
 }
 
 // TODO: Implement conversion func from USD to target currency
-pub fn get_conv_from_usd() -> () {}
+pub fn get_conv_from_usd(amt: f64, to: String) -> Conversion {
+    let to_rate: ForexRate = get_forex_rate(to).unwrap();
+
+    Conversion {
+        symbol: to_rate.symbol,
+        value: amt * to_rate.rate
+    }
+}
 
 // TODO: Implement conversion func for currency parameters
 pub fn get_conv(amt: f64, from: String, to: String) -> () {}
