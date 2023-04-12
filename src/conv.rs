@@ -17,7 +17,6 @@ pub fn get_conv_to_usd(amt: f64, from: String) -> Conversion {
     }
 }
 
-// TODO: Implement conversion func from USD to target currency
 pub fn get_conv_from_usd(amt: f64, to: String) -> Conversion {
     let to_rate: ForexRate = get_forex_rate(to).unwrap();
 
