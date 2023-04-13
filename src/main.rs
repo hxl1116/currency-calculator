@@ -2,11 +2,11 @@ mod args;
 mod conv;
 mod rate;
 
-use args::CalcArgs;
+use args::ConversionArgs;
 use clap::Parser;
 
 fn main() {
-    let _args = CalcArgs::parse();
+    let _args = ConversionArgs::parse();
 
     // TODO: Handle arguments
 }
