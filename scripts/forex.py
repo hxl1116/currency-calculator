@@ -1,4 +1,4 @@
-from utils import read_json_file, redis_client
+from utils import read_json_file, redis_client, upload_data_to_redis
 
 from collections import namedtuple
 
@@ -9,6 +9,9 @@ CURRENCY_INFO_CSV_FILE = 'assets/forex_rates.csv'
 
 CURRENCY_CODES_DATA_IDENTIFIER = 'symbols'
 CURRENCY_RATES_DATA_IDENTIFIER = 'rates'
+
+CURRENCY_CODES_NAMESPACE_IDENTIFIER = 'currency_codes'
+CURRENCY_RATES_NAMESPACE_IDENTIFIER = 'currency_rates'
 
 ConversionInfo = namedtuple('ConversionInfo', 'code name rate inverse')
 
@@ -40,21 +43,16 @@ def process_currency_data():
 
 
 def upload_currency_data_to_redis(codes_data, rates_data, conversion_data):
-    redis = redis_client()
+    upload_data_to_redis(
+        data_set=codes_data,
+        namespace_identifier=CURRENCY_CODES_NAMESPACE_IDENTIFIER
+    )
+    upload_data_to_redis(
+        data_set=rates_data,
+        namespace_identifier=CURRENCY_RATES_NAMESPACE_IDENTIFIER
+    )
 
-    if redis.get('currency_info') is None:
-        pass
-
-
-def load_data(forex_data):
-    redis = redis_client()
-
-    if redis.get('forex_rates') is None:
-        redis.hset('forex_rates', mapping={rate.symbol: f'forex_rate:{rate.symbol}'
-                                           for rate in forex_data})
-
-    for rate in forex_data:
-        redis.hset(f'forex_rate:{rate.symbol}', mapping=rate._asdict())
+    # TODO: Upload conversion data
 
 
 def main():

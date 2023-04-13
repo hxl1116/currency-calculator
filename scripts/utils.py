@@ -1,6 +1,7 @@
+from redis import Redis
+
 import csv
 import json
-import redis
 
 
 def read_json_file(filepath, data_identifier):
@@ -29,5 +30,16 @@ def write_csv(filepath, data):
         writer.writerows(data)
 
 
-def redis_client(host='localhost', port=6379):
-    return redis.Redis(host, port, decode_responses=True)
+def redis_client(host='localhost', port=6379) -> Redis:
+    return Redis(host, port, decode_responses=True)
+
+
+# TODO: Add value namespace mapping param
+def upload_data_to_redis(data_set, namespace_identifier):
+    redis = redis_client()
+
+    if redis.get(namespace_identifier) is None:
+        redis.hset(
+            namespace_identifier,
+            mapping=data_set
+        )
