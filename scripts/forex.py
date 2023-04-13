@@ -1,43 +1,21 @@
+from scripts.utils import read_json_file, redis_client
+
 from collections import namedtuple
-from redis import Redis
 
-import csv
-import json
 
-FOREX_RATES_JSON_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-calc/assets/forex_rates.json'
-FOREX_SYMBOLS_JSON_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-calc/assets/forex_symbols.json'
-FOREX_RATES_CSV_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-calc/assets/forex_rates.csv'
+CURRENCY_CODES_JSON_FILE = 'assets/currency_codes.json'
+CURRENCY_RATES_JSON_FILE = 'assets/currency_rates.json'
+CURRENCY_INFO_CSV_FILE = 'assets/forex_rates.csv'
 
+CURRENCY_CODES_DATA_IDENTIFIER = 'symbols'
+CURRENCY_RATES_DATA_IDENTIFIER = 'rates'
+
+CurrencyCode = namedtuple('CurrencyCode', 'code name')
+CurrencyRate = namedtuple('CurrencyRate', 'code rate')
 ConversionInfo = namedtuple('ConversionInfo', 'code name rate inverse')
 
 
-def read_json(filepath, key):
-    with open(filepath) as jsonfile:
-        data = json.load(jsonfile)
-
-        return data[key]
-
-
-def read_csv(filepath):
-    with open(filepath, 'r') as csvfile:
-        reader = csv.reader(csvfile)
-
-        data = list()
-
-        for row in reader:
-            data.append(ConversionInfo(*row))
-
-        return data
-            
-
-def write_csv(filepath, data):
-    with open(filepath, 'w+') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(('Code', 'Name', 'Rate', 'Inverse'))
-        writer.writerows(data)
-
-
-def merge_data(rates_data, symbols_data):
+def combine_currency_data(rates_data, symbols_data):
     rates = list()
 
     for k, v in rates_data.items():
@@ -46,12 +24,27 @@ def merge_data(rates_data, symbols_data):
     return rates
 
 
-def connect(host='localhost', port=6379):
-    return Redis(host, port, decode_responses=True)
+def process_currency_data():
+    currency_codes_data = read_json_file(
+        CURRENCY_CODES_JSON_FILE,
+        CURRENCY_CODES_DATA_IDENTIFIER
+    )
+
+    currency_rates_data = read_json_file(
+        CURRENCY_RATES_JSON_FILE,
+        CURRENCY_RATES_DATA_IDENTIFIER
+    )
+
+
+def upload_currency_data_to_redis(currency_codes_data, currency_rates_data):
+    redis = redis_client()
+
+    if redis.get('currency_info') is None:
+        pass
 
 
 def load_data(forex_data):
-    redis: Redis = connect()
+    redis = redis_client()
 
     if redis.get('forex_rates') is None:
         redis.hset('forex_rates', mapping={rate.symbol: f'forex_rate:{rate.symbol}'
@@ -62,15 +55,7 @@ def load_data(forex_data):
 
 
 def main():
-    # rates_data = read_json(FOREX_RATES_JSON_FILE, 'rates')
-    # symbols_data = read_json(FOREX_SYMBOLS_JSON_FILE, 'symbols')
-    # forex_data = merge_data(rates_data, symbols_data)
-
-    # write_csv('forex_rates.csv', forex_data)
-
-    forex_data = read_csv(FOREX_RATES_CSV_FILE)
-
-    load_data(forex_data)
+    process_currency_data()
 
 
 if __name__ == '__main__':
