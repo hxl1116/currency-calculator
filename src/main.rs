@@ -7,4 +7,6 @@ use clap::Parser;
 
 fn main() {
     let _args = CalcArgs::parse();
+
+    // TODO: Handle arguments
 }
