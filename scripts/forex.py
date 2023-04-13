@@ -8,7 +8,7 @@ FOREX_RATES_JSON_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-cal
 FOREX_SYMBOLS_JSON_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-calc/assets/forex_symbols.json'
 FOREX_RATES_CSV_FILE = '/Users/henrylarson/Documents/Projects/Misc/currency-calc/assets/forex_rates.csv'
 
-Rate = namedtuple('Rate', 'symbol name rate inverse')
+ConversionInfo = namedtuple('ConversionInfo', 'code name rate inverse')
 
 
 def read_json(filepath, key):
@@ -25,7 +25,7 @@ def read_csv(filepath):
         data = list()
 
         for row in reader:
-            data.append(Rate(*row))
+            data.append(ConversionInfo(*row))
 
         return data
             
@@ -33,7 +33,7 @@ def read_csv(filepath):
 def write_csv(filepath, data):
     with open(filepath, 'w+') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(('Symbol', 'Name', 'Rate', 'Inverse'))
+        writer.writerow(('Code', 'Name', 'Rate', 'Inverse'))
         writer.writerows(data)
 
 
@@ -41,7 +41,7 @@ def merge_data(rates_data, symbols_data):
     rates = list()
 
     for k, v in rates_data.items():
-        rates.append(Rate(k, symbols_data[k], v, round(1/v, 7)))
+        rates.append(ConversionInfo(k, symbols_data[k], v, round(1/v, 7)))
 
     return rates
 
