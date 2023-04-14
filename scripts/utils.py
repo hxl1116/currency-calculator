@@ -11,18 +11,6 @@ def read_json_file(filepath, data_identifier):
         return data[data_identifier]
 
 
-# def read_csv_file(filepath):
-#     with open(filepath, 'r') as csvfile:
-#         reader = csv.reader(csvfile)
-
-#         data = list()
-
-#         for row in reader:
-#             data.append(ConversionInfo(*row))
-
-#         return data
-
-
 def write_csv(filepath, data):
     with open(filepath, 'w+') as csvfile:
         writer = csv.writer(csvfile)
@@ -34,12 +22,12 @@ def redis_client(host='localhost', port=6379) -> Redis:
     return Redis(host, port, decode_responses=True)
 
 
-# TODO: Add value namespace mapping param
-def upload_data_to_redis(data_set, namespace_identifier):
+def upload_data_to_redis(data_set, namespace_mapping, namespace_modifier=None):
     redis = redis_client()
 
-    if redis.get(namespace_identifier) is None:
-        redis.hset(
-            namespace_identifier,
-            mapping=data_set
-        )
+    if namespace_modifier:
+        namespace_mapping = f'{namespace_mapping}:{namespace_modifier}'
+
+    # Check to see if hash already exists
+    if redis.get(namespace_mapping) is None:
+        redis.hset(namespace_mapping, mapping=data_set)
