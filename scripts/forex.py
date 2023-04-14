@@ -1,17 +1,18 @@
-from utils import read_json_file, redis_client, upload_data_to_redis
+from utils import read_json_file, upload_data_to_redis, write_csv
 
 from collections import namedtuple
 
 
 CURRENCY_CODES_JSON_FILE = 'assets/currency_codes.json'
 CURRENCY_RATES_JSON_FILE = 'assets/currency_rates.json'
-CURRENCY_INFO_CSV_FILE = 'assets/forex_rates.csv'
+CONVERSIONS_INFO_CSV_FILE = 'assets/conversion_info.csv'
 
 CURRENCY_CODES_DATA_IDENTIFIER = 'symbols'
 CURRENCY_RATES_DATA_IDENTIFIER = 'rates'
 
 CURRENCY_CODES_NAMESPACE_IDENTIFIER = 'currency_codes'
 CURRENCY_RATES_NAMESPACE_IDENTIFIER = 'currency_rates'
+CONVERSION_INFO_NAMESPACE_IDENTIFIER = 'conversion_info'
 
 ConversionInfo = namedtuple('ConversionInfo', 'code name rate inverse')
 
@@ -34,8 +35,8 @@ def process_currency_data():
             ConversionInfo(
                 code=currency_code,
                 name=currency_name,
-                rate=currency_rates_data[currency_code],
-                inverse=(1 / currency_rates_data[currency_code])
+                rate=round(currency_rates_data[currency_code], 6),
+                inverse=round(1 / currency_rates_data[currency_code], 6)
             )
         )
 
@@ -45,14 +46,21 @@ def process_currency_data():
 def upload_currency_data_to_redis(codes_data, rates_data, conversion_data):
     upload_data_to_redis(
         data_set=codes_data,
-        namespace_identifier=CURRENCY_CODES_NAMESPACE_IDENTIFIER
-    )
-    upload_data_to_redis(
-        data_set=rates_data,
-        namespace_identifier=CURRENCY_RATES_NAMESPACE_IDENTIFIER
+        namespace_mapping=CURRENCY_CODES_NAMESPACE_IDENTIFIER
     )
 
-    # TODO: Upload conversion data
+    upload_data_to_redis(
+        data_set=rates_data,
+        namespace_mapping=CURRENCY_RATES_NAMESPACE_IDENTIFIER
+    )
+
+    for conversion in conversion_data:
+        conversion: ConversionInfo = conversion
+        upload_data_to_redis(
+            data_set=conversion._asdict(),
+            namespace_mapping=CONVERSION_INFO_NAMESPACE_IDENTIFIER,
+            namespace_modifier=conversion.code
+        )
 
 
 def main():
@@ -63,6 +71,8 @@ def main():
         rates_data=rates,
         conversion_data=conversions
     )
+
+    # write_csv(filepath=CONVERSIONS_INFO_CSV_FILE, data=conversions)
 
 
 if __name__ == '__main__':
