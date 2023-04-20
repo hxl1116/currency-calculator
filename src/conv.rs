@@ -1,4 +1,4 @@
-use crate::rate::{get_conversion_info, ConversionInfo};
+use crate::forex::{ConversionInfo, get_conversion_info};
 
 pub fn convert_currency(amt: f64, from: String, to: String) -> f64 {
     let from_rate: ConversionInfo = get_conversion_info(from).unwrap();

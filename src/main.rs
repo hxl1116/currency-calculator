@@ -1,12 +1,9 @@
 mod args;
 mod conv;
-mod rate;
-
-use args::ConversionArgs;
-use clap::Parser;
+mod forex;
 
 fn main() {
-    let _args = ConversionArgs::parse();
+    // let _args = ConversionArgs::parse();
 
     // TODO: Handle arguments
 }
